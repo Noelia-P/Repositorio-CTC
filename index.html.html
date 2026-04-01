@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipo de Salud Mental</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+  .app { max-width: 680px; margin: 0 auto; padding: 1rem; }
+  .app-header { text-align: center; padding: 1rem 0 0.5rem; margin-bottom: 1rem; }
+  .app-header h1 { font-size: 20px; font-weight: 500; color: #1a1a1a; }
+  .app-header p { font-size: 13px; color: #666; margin-top: 4px; }
+  .tab-bar { display: flex; gap: 4px; background: #ebebeb; border-radius: 12px; padding: 4px; margin-bottom: 1rem; }
+  .tab { flex: 1; padding: 9px 4px; border: none; background: transparent; border-radius: 9px; font-size: 13px; color: #666; cursor: pointer; font-family: inherit; transition: all 0.15s; text-align: center; }
+  .tab.active { background: #fff; color: #1a1a1a; font-weight: 500; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .section { display: none; }
+  .section.active { display: block; }
+  .card { background: #fff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; }
+  .badge { display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 999px; font-weight: 500; }
+  .badge-green { background: #EAF3DE; color: #3B6D11; }
+  .badge-red { background: #FCEBEB; color: #A32D2D; }
+  .badge-blue { background: #E6F1FB; color: #185FA5; }
+  .badge-purple { background: #EEEDFE; color: #3C3489; }
+  .badge-gray { background: #F1EFE8; color: #5F5E5A; }
+  .badge-teal { background: #E1F5EE; color: #0F6E56; }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 14px; flex-shrink: 0; }
+  .av-purple { background: #EEEDFE; color: #3C3489; }
+  .av-teal { background: #E1F5EE; color: #0F6E56; }
+  .av-blue { background: #E6F1FB; color: #185FA5; }
+  .av-coral { background: #FAECE7; color: #993C1D; }
+  .prof-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .prof-info h3 { font-size: 15px; font-weight: 500; }
+  .prof-info p { font-size: 13px; color: #666; margin-top: 2px; }
+  .prof-details { border-top: 1px solid #f0f0f0; padding-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .contact-row { font-size: 13px; color: #666; margin-bottom: 3px; }
+  .contact-val { color: #1a1a1a; }
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .filter-bar select { flex: 1; min-width: 120px; font-size: 13px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-family: inherit; }
+  .section-title { font-size: 18px; font-weight: 500; }
+  .btn-primary { background: #fff; border: 1px solid #ccc; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 500; cursor: pointer; color: #1a1a1a; font-family: inherit; }
+  .btn-primary:hover { background: #f5f5f5; }
+  .btn-small { background: transparent; border: 1px solid #e0e0e0; border-radius: 8px; padding: 5px 12px; font-size: 12px; cursor: pointer; color: #555; font-family: inherit; }
+  .btn-small:hover { background: #f5f5f5; }
+  .btn-danger { color: #A32D2D; }
+  .form-overlay { display: none; min-height: 500px; background: rgba(0,0,0,0.4); border-radius: 12px; align-items: flex-start; justify-content: center; padding: 20px 8px; margin-bottom: 0.75rem; }
+  .form-overlay.open { display: flex; }
+  .form-card { background: #fff; border-radius: 12px; border: 1px solid #e8e8e8; padding: 1.25rem; width: 100%; max-width: 440px; }
+  .form-card h3 { font-size: 16px; font-weight: 500; margin-bottom: 1rem; }
+  .field { margin-bottom: 0.75rem; }
+  .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+  .field input, .field select, .field textarea { width: 100%; font-size: 14px; font-family: inherit; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: #888; }
+  .field textarea { min-height: 80px; resize: vertical; }
+  .form-actions { display: flex; gap: 8px; margin-top: 1rem; }
+  .form-actions button { flex: 1; }
+  .top-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .search-input { width: 100%; font-size: 14px; margin-bottom: 0.75rem; font-family: inherit; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; }
+  .search-input:focus { outline: none; border-color: #888; }
+  .tag-zona { font-size: 11px; background: #f0f0f0; color: #555; padding: 3px 9px; border-radius: 999px; }
+  .minuta-date { font-size: 12px; color: #888; margin-bottom: 5px; }
+  .minuta-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+  .minuta-body { font-size: 13px; color: #555; line-height: 1.6; white-space: pre-wrap; }
+  .minuta-actions { display: flex; gap: 6px; margin-top: 10px; border-top: 1px solid #f0f0f0; padding-top: 10px; }
+  .repo-title { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .repo-meta { font-size: 12px; color: #888; margin-bottom: 8px; }
+  .repo-desc { font-size: 13px; color: #555; line-height: 1.6; }
+  .empty-state { text-align: center; padding: 2rem; color: #888; font-size: 14px; }
+  .save-notice { font-size: 11px; color: #3B6D11; text-align: right; padding: 2px 0 6px; min-height: 18px; }
+  .loading { text-align: center; padding: 2rem; color: #888; font-size: 14px; }
+  .card-actions { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="app-header">
+    <h1>Equipo de Salud Mental</h1>
+    <p>Directorio · Minutas · Repositorio</p>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('directorio')">Directorio</button>
+    <button class="tab" onclick="switchTab('minutas')">Minutas</button>
+    <button class="tab" onclick="switchTab('repositorio')">Repositorio</button>
+  </div>
+  <div class="save-notice" id="save-notice"></div>
+
+  <!-- DIRECTORIO -->
+  <div class="section active" id="tab-directorio">
+    <div class="top-actions">
+      <span class="section-title">Equipo</span>
+      <button class="btn-primary" onclick="openForm('prof')">+ Agregar</button>
+    </div>
+    <input class="search-input" type="text" placeholder="Buscar por nombre..." id="search-prof" oninput="renderProfesionales()">
+    <div class="filter-bar">
+      <select id="filter-esp" onchange="renderProfesionales()">
+        <option value="">Todas las especialidades</option>
+        <option>Psicología</option>
+        <option>Psiquiatría</option>
+        <option>Neuropsicología</option>
+        <option>Otra</option>
+      </select>
+      <select id="filter-disp" onchange="renderProfesionales()">
+        <option value="">Disponibilidad</option>
+        <option value="si">Con disponibilidad</option>
+        <option value="no">Sin disponibilidad</option>
+      </select>
+      <select id="filter-modal" onchange="renderProfesionales()">
+        <option value="">Modalidad</option>
+        <option value="presencial">Presencial</option>
+        <option value="virtual">Virtual</option>
+        <option value="ambas">Ambas</option>
+      </select>
+    </div>
+    <div id="lista-profesionales"><div class="loading">Cargando...</div></div>
+
+    <div class="form-overlay" id="form-prof">
+      <div class="form-card">
+        <h3>Nuevo profesional</h3>
+        <div class="field"><label>Nombre</label><input type="text" id="fp-nombre" placeholder="Ej: María García"></div>
+        <div class="field"><label>Especialidad</label>
+          <select id="fp-esp"><option>Psicología</option><option>Psiquiatría</option><option>Neuropsicología</option><option>Otra</option></select>
+        </div>
+        <div class="field"><label>Zona / Barrio</label><input type="text" id="fp-zona" placeholder="Ej: Palermo, CABA"></div>
+        <div class="field"><label>Teléfono / WhatsApp</label><input type="text" id="fp-tel" placeholder="+54 11 ..."></div>
+        <div class="field"><label>Email</label><input type="email" id="fp-email" placeholder="mail@ejemplo.com"></div>
+        <div class="field"><label>Modalidad de atención</label>
+          <select id="fp-modalidad"><option value="presencial">Presencial</option><option value="virtual">Virtual</option><option value="ambas">Presencial y virtual</option></select>
+        </div>
+        <div class="field"><label>Disponibilidad actual</label>
+          <select id="fp-disp"><option value="si">Con disponibilidad</option><option value="no">Sin disponibilidad</option></select>
+        </div>
+        <div class="field"><label>Notas adicionales</label><textarea id="fp-notas" placeholder="Obras sociales, horarios, especialización..."></textarea></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveProfesional()">Guardar</button>
+          <button class="btn-small" onclick="closeForm('prof')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-overlay" id="edit-form-prof">
+      <div class="form-card">
+        <h3>Editar profesional</h3>
+        <input type="hidden" id="edit-prof-id">
+        <div class="field"><label>Nombre</label><input type="text" id="ep-nombre"></div>
+        <div class="field"><label>Especialidad</label>
+          <select id="ep-esp"><option>Psicología</option><option>Psiquiatría</option><option>Neuropsicología</option><option>Otra</option></select>
+        </div>
+        <div class="field"><label>Zona / Barrio</label><input type="text" id="ep-zona"></div>
+        <div class="field"><label>Teléfono / WhatsApp</label><input type="text" id="ep-tel"></div>
+        <div class="field"><label>Email</label><input type="email" id="ep-email"></div>
+        <div class="field"><label>Modalidad</label>
+          <select id="ep-modalidad"><option value="presencial">Presencial</option><option value="virtual">Virtual</option><option value="ambas">Presencial y virtual</option></select>
+        </div>
+        <div class="field"><label>Disponibilidad</label>
+          <select id="ep-disp"><option value="si">Con disponibilidad</option><option value="no">Sin disponibilidad</option></select>
+        </div>
+        <div class="field"><label>Notas</label><textarea id="ep-notas"></textarea></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveEditProf()">Guardar cambios</button>
+          <button class="btn-small" onclick="closeForm('edit-form-prof', true)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINUTAS -->
+  <div class="section" id="tab-minutas">
+    <div class="top-actions">
+      <span class="section-title">Minutas</span>
+      <button class="btn-primary" onclick="openForm('minuta')">+ Nueva</button>
+    </div>
+    <div id="lista-minutas"><div class="loading">Cargando...</div></div>
+
+    <div class="form-overlay" id="form-minuta">
+      <div class="form-card">
+        <h3>Nueva minuta</h3>
+        <div class="field"><label>Fecha de reunión</label><input type="date" id="fm-fecha"></div>
+        <div class="field"><label>Título / Tema</label><input type="text" id="fm-titulo" placeholder="Ej: Reunión semanal — casos clínicos"></div>
+        <div class="field"><label>Participantes</label><input type="text" id="fm-participantes" placeholder="Ej: María, Juan, Lucía..."></div>
+        <div class="field"><label>Contenido / Actas</label><textarea id="fm-cuerpo" placeholder="Temas tratados, acuerdos, tareas..."></textarea></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveMinuta()">Guardar</button>
+          <button class="btn-small" onclick="closeForm('minuta')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-overlay" id="edit-form-minuta">
+      <div class="form-card">
+        <h3>Editar minuta</h3>
+        <input type="hidden" id="em-id">
+        <div class="field"><label>Fecha</label><input type="date" id="em-fecha"></div>
+        <div class="field"><label>Título</label><input type="text" id="em-titulo"></div>
+        <div class="field"><label>Participantes</label><input type="text" id="em-participantes"></div>
+        <div class="field"><label>Contenido</label><textarea id="em-cuerpo"></textarea></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveEditMinuta()">Guardar cambios</button>
+          <button class="btn-small" onclick="closeForm('edit-form-minuta', true)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPOSITORIO -->
+  <div class="section" id="tab-repositorio">
+    <div class="top-actions">
+      <span class="section-title">Repositorio</span>
+      <button class="btn-primary" onclick="openForm('repo')">+ Agregar</button>
+    </div>
+    <input class="search-input" type="text" placeholder="Buscar artículos o notas..." id="search-repo" oninput="renderRepo()">
+    <div id="lista-repo"><div class="loading">Cargando...</div></div>
+
+    <div class="form-overlay" id="form-repo">
+      <div class="form-card">
+        <h3>Agregar recurso</h3>
+        <div class="field"><label>Título</label><input type="text" id="fr-titulo" placeholder="Título del artículo o nota"></div>
+        <div class="field"><label>Tipo</label>
+          <select id="fr-tipo"><option>Artículo</option><option>Nota clínica</option><option>Protocolo</option><option>Recurso</option><option>Otro</option></select>
+        </div>
+        <div class="field"><label>Autor / Fuente</label><input type="text" id="fr-fuente" placeholder="Ej: DSM-5, APA, Dr. Pérez..."></div>
+        <div class="field"><label>Enlace (opcional)</label><input type="url" id="fr-link" placeholder="https://..."></div>
+        <div class="field"><label>Descripción / Resumen</label><textarea id="fr-desc" placeholder="Breve descripción del contenido..."></textarea></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveRepo()">Guardar</button>
+          <button class="btn-small" onclick="closeForm('repo')">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD0zF2ywZlqZeuuTVj_OCsNlTau6J5wb2c",
+  authDomain: "datos-de-profesionales-ctc.firebaseapp.com",
+  databaseURL: "https://datos-de-profesionales-ctc-default-rtdb.firebaseio.com",
+  projectId: "datos-de-profesionales-ctc",
+  storageBucket: "datos-de-profesionales-ctc.firebasestorage.app",
+  messagingSenderId: "163119112392",
+  appId: "1:163119112392:web:a801309b2a22ee1f2145fd"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const AVCOLORS = ['av-purple','av-teal','av-blue','av-coral'];
+function getAV(name){let i=0;for(let c of name)i+=c.charCodeAt(0);return AVCOLORS[i%AVCOLORS.length];}
+function initials(name){return name.trim().split(' ').slice(0,2).map(w=>w[0]||'').join('').toUpperCase();}
+
+let profesionales = [], minutas = [], repositorio = [];
+
+function showNotice(msg){ const el=document.getElementById('save-notice'); el.textContent=msg; setTimeout(()=>el.textContent='',2500); }
+
+// Tabs
+window.switchTab = function(tab) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+}
+
+// Forms
+window.openForm = function(tipo) {
+  const id = tipo.includes('form') ? tipo : 'form-'+tipo;
+  document.getElementById(id).classList.add('open');
+  if(tipo==='minuta'){ const d=new Date(); document.getElementById('fm-fecha').value=d.toISOString().slice(0,10); }
+}
+window.closeForm = function(tipo, isFullId=false) {
+  const id = isFullId ? tipo : 'form-'+tipo;
+  document.getElementById(id).classList.remove('open');
+}
+
+function modalidadLabel(m){if(m==='presencial')return 'Presencial';if(m==='virtual')return 'Virtual';return 'Presencial y virtual';}
+function modalidadBadge(m){if(m==='presencial')return 'badge-purple';if(m==='virtual')return 'badge-blue';return 'badge-teal';}
+
+// ---- PROFESIONALES ----
+function listenProfesionales() {
+  const q = query(collection(db,'profesionales'), orderBy('nombre'));
+  onSnapshot(q, snap => {
+    profesionales = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderProfesionales();
+  }, err => {
+    document.getElementById('lista-profesionales').innerHTML='<div class="empty-state">Error al cargar. Revisá la conexión.</div>';
+  });
+}
+
+window.renderProfesionales = function() {
+  const sq=(document.getElementById('search-prof').value||'').toLowerCase();
+  const esp=document.getElementById('filter-esp').value;
+  const disp=document.getElementById('filter-disp').value;
+  const modal=document.getElementById('filter-modal').value;
+  const list=document.getElementById('lista-profesionales');
+  const filtered=profesionales.filter(p=>{
+    if(sq&&!p.nombre.toLowerCase().includes(sq))return false;
+    if(esp&&p.especialidad!==esp)return false;
+    if(disp&&p.disponibilidad!==disp)return false;
+    if(modal&&p.modalidad!==modal)return false;
+    return true;
+  });
+  if(!filtered.length){list.innerHTML='<div class="empty-state">No se encontraron profesionales.</div>';return;}
+  list.innerHTML=filtered.map(p=>`<div class="card">
+    <div class="prof-header">
+      <div class="avatar ${getAV(p.nombre)}">${initials(p.nombre)}</div>
+      <div class="prof-info"><h3>${p.nombre}</h3><p>${p.especialidad}</p></div>
+    </div>
+    ${p.tel?`<div class="contact-row">Tel: <span class="contact-val">${p.tel}</span></div>`:''}
+    ${p.email?`<div class="contact-row">Email: <span class="contact-val">${p.email}</span></div>`:''}
+    <div class="prof-details">
+      <span class="badge ${p.disponibilidad==='si'?'badge-green':'badge-red'}">${p.disponibilidad==='si'?'Con disponibilidad':'Sin disponibilidad'}</span>
+      <span class="badge ${modalidadBadge(p.modalidad)}">${modalidadLabel(p.modalidad)}</span>
+      ${p.zona?`<span class="tag-zona">${p.zona}</span>`:''}
+    </div>
+    ${p.notas?`<div class="contact-row" style="margin-top:8px;font-size:12px;">${p.notas}</div>`:''}
+    <div class="card-actions">
+      <button class="btn-small" onclick="editProfesional('${p.id}')">Editar</button>
+      <button class="btn-small" onclick="toggleDisp('${p.id}','${p.disponibilidad}')">${p.disponibilidad==='si'?'Marcar sin disp.':'Marcar disponible'}</button>
+      <button class="btn-small btn-danger" onclick="deleteProf('${p.id}','${p.nombre}')">Eliminar</button>
+    </div>
+  </div>`).join('');
+}
+
+window.saveProfesional = async function() {
+  const p={nombre:document.getElementById('fp-nombre').value.trim(),especialidad:document.getElementById('fp-esp').value,zona:document.getElementById('fp-zona').value.trim(),tel:document.getElementById('fp-tel').value.trim(),email:document.getElementById('fp-email').value.trim(),modalidad:document.getElementById('fp-modalidad').value,disponibilidad:document.getElementById('fp-disp').value,notas:document.getElementById('fp-notas').value.trim()};
+  if(!p.nombre){alert('Por favor ingresá un nombre.');return;}
+  try{await addDoc(collection(db,'profesionales'),p);showNotice('Guardado');['fp-nombre','fp-zona','fp-tel','fp-email','fp-notas'].forEach(id=>document.getElementById(id).value='');closeForm('prof');}
+  catch(e){alert('Error al guardar: '+e.message);}
+}
+
+window.editProfesional = function(id) {
+  const p=profesionales.find(x=>x.id===id);
+  if(!p)return;
+  document.getElementById('edit-prof-id').value=id;
+  document.getElementById('ep-nombre').value=p.nombre;
+  document.getElementById('ep-esp').value=p.especialidad;
+  document.getElementById('ep-zona').value=p.zona||'';
+  document.getElementById('ep-tel').value=p.tel||'';
+  document.getElementById('ep-email').value=p.email||'';
+  document.getElementById('ep-modalidad').value=p.modalidad;
+  document.getElementById('ep-disp').value=p.disponibilidad;
+  document.getElementById('ep-notas').value=p.notas||'';
+  document.getElementById('edit-form-prof').classList.add('open');
+}
+
+window.saveEditProf = async function() {
+  const id=document.getElementById('edit-prof-id').value;
+  const p={nombre:document.getElementById('ep-nombre').value.trim(),especialidad:document.getElementById('ep-esp').value,zona:document.getElementById('ep-zona').value.trim(),tel:document.getElementById('ep-tel').value.trim(),email:document.getElementById('ep-email').value.trim(),modalidad:document.getElementById('ep-modalidad').value,disponibilidad:document.getElementById('ep-disp').value,notas:document.getElementById('ep-notas').value.trim()};
+  try{await updateDoc(doc(db,'profesionales',id),p);showNotice('Actualizado');closeForm('edit-form-prof',true);}
+  catch(e){alert('Error: '+e.message);}
+}
+
+window.toggleDisp = async function(id, actual) {
+  try{await updateDoc(doc(db,'profesionales',id),{disponibilidad:actual==='si'?'no':'si'});showNotice('Disponibilidad actualizada');}
+  catch(e){alert('Error: '+e.message);}
+}
+
+window.deleteProf = async function(id, nombre) {
+  if(!confirm('¿Eliminar a '+nombre+'?'))return;
+  try{await deleteDoc(doc(db,'profesionales',id));showNotice('Eliminado');}
+  catch(e){alert('Error: '+e.message);}
+}
+
+// ---- MINUTAS ----
+function listenMinutas() {
+  const q = query(collection(db,'minutas'), orderBy('fecha','desc'));
+  onSnapshot(q, snap => {
+    minutas = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMinutas();
+  });
+}
+
+window.renderMinutas = function() {
+  const list=document.getElementById('lista-minutas');
+  if(!minutas.length){list.innerHTML='<div class="empty-state">Todavía no hay minutas cargadas.</div>';return;}
+  list.innerHTML=minutas.map(m=>{
+    const fDisplay=m.fecha?new Date(m.fecha+'T12:00:00').toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'}):'';
+    return `<div class="card">
+      <div class="minuta-date">${fDisplay}${m.participantes?' — '+m.participantes:''}</div>
+      <div class="minuta-title">${m.titulo}</div>
+      <div class="minuta-body">${m.cuerpo||''}</div>
+      <div class="minuta-actions">
+        <button class="btn-small" onclick="editMinuta('${m.id}')">Editar</button>
+        <button class="btn-small btn-danger" onclick="deleteMinuta('${m.id}')">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.saveMinuta = async function() {
+  const m={fecha:document.getElementById('fm-fecha').value,titulo:document.getElementById('fm-titulo').value.trim(),participantes:document.getElementById('fm-participantes').value.trim(),cuerpo:document.getElementById('fm-cuerpo').value.trim()};
+  if(!m.titulo){alert('Por favor ingresá un título.');return;}
+  try{await addDoc(collection(db,'minutas'),m);showNotice('Guardado');['fm-titulo','fm-participantes','fm-cuerpo'].forEach(id=>document.getElementById(id).value='');closeForm('minuta');}
+  catch(e){alert('Error: '+e.message);}
+}
+
+window.editMinuta = function(id) {
+  const m=minutas.find(x=>x.id===id);
+  if(!m)return;
+  document.getElementById('em-id').value=id;
+  document.getElementById('em-fecha').value=m.fecha||'';
+  document.getElementById('em-titulo').value=m.titulo||'';
+  document.getElementById('em-participantes').value=m.participantes||'';
+  document.getElementById('em-cuerpo').value=m.cuerpo||'';
+  document.getElementById('edit-form-minuta').classList.add('open');
+}
+
+window.saveEditMinuta = async function() {
+  const id=document.getElementById('em-id').value;
+  const m={fecha:document.getElementById('em-fecha').value,titulo:document.getElementById('em-titulo').value.trim(),participantes:document.getElementById('em-participantes').value.trim(),cuerpo:document.getElementById('em-cuerpo').value.trim()};
+  try{await updateDoc(doc(db,'minutas',id),m);showNotice('Actualizado');closeForm('edit-form-minuta',true);}
+  catch(e){alert('Error: '+e.message);}
+}
+
+window.deleteMinuta = async function(id) {
+  if(!confirm('¿Eliminar esta minuta?'))return;
+  try{await deleteDoc(doc(db,'minutas',id));showNotice('Eliminado');}
+  catch(e){alert('Error: '+e.message);}
+}
+
+// ---- REPOSITORIO ----
+function listenRepo() {
+  const q = query(collection(db,'repositorio'), orderBy('titulo'));
+  onSnapshot(q, snap => {
+    repositorio = snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderRepo();
+  });
+}
+
+window.renderRepo = function() {
+  const sq=(document.getElementById('search-repo').value||'').toLowerCase();
+  const list=document.getElementById('lista-repo');
+  const filtered=repositorio.filter(r=>!sq||r.titulo.toLowerCase().includes(sq)||(r.desc||'').toLowerCase().includes(sq));
+  if(!filtered.length){list.innerHTML='<div class="empty-state">No se encontraron recursos.</div>';return;}
+  const tipoBadge={Artículo:'badge-blue','Nota clínica':'badge-teal',Protocolo:'badge-purple',Recurso:'badge-gray',Otro:'badge-gray'};
+  list.innerHTML=filtered.map(r=>`<div class="card">
+    <div class="repo-title">${r.titulo}</div>
+    <div class="repo-meta"><span class="badge ${tipoBadge[r.tipo]||'badge-gray'}">${r.tipo}</span>${r.fuente?' &nbsp;'+r.fuente:''}</div>
+    ${r.desc?`<div class="repo-desc">${r.desc}</div>`:''}
+    <div class="card-actions">
+      ${r.link?`<button class="btn-small" onclick="window.open('${r.link}','_blank')">Ver enlace</button>`:''}
+      <button class="btn-small btn-danger" onclick="deleteRepo('${r.id}')">Eliminar</button>
+    </div>
+  </div>`).join('');
+}
+
+window.saveRepo = async function() {
+  const r={titulo:document.getElementById('fr-titulo').value.trim(),tipo:document.getElementById('fr-tipo').value,fuente:document.getElementById('fr-fuente').value.trim(),link:document.getElementById('fr-link').value.trim(),desc:document.getElementById('fr-desc').value.trim()};
+  if(!r.titulo){alert('Por favor ingresá un título.');return;}
+  try{await addDoc(collection(db,'repositorio'),r);showNotice('Guardado');['fr-titulo','fr-fuente','fr-link','fr-desc'].forEach(id=>document.getElementById(id).value='');closeForm('repo');}
+  catch(e){alert('Error: '+e.message);}
+}
+
+window.deleteRepo = async function(id) {
+  if(!confirm('¿Eliminar este recurso?'))return;
+  try{await deleteDoc(doc(db,'repositorio',id));showNotice('Eliminado');}
+  catch(e){alert('Error: '+e.message);}
+}
+
+// Iniciar listeners
+listenProfesionales();
+listenMinutas();
+listenRepo();
+</script>
+</body>
+</html>
